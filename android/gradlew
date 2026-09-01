@@ -1,0 +1,23 @@
+#!/bin/sh
+
+#
+# Copyright 2015 the original author or authors.
+#
+
+APP_NAME="Gradle"
+APP_BASE_NAME=`basename "$0"`
+
+DIRNAME=`dirname "$0"`
+if [ "$DIRNAME" = "." ] ; then
+  DIRNAME=`pwd`
+fi
+
+if [ -n "$JAVA_HOME" ] ; then
+    JAVACMD="$JAVA_HOME/bin/java"
+else
+    JAVACMD="java"
+fi
+
+CLASSPATH=$DIRNAME/gradle/wrapper/gradle-wrapper.jar
+
+exec "$JAVACMD" "-Dorg.gradle.appname=$APP_BASE_NAME" -classpath "$CLASSPATH" org.gradle.wrapper.GradleWrapperMain "$@"

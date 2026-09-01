@@ -1,0 +1,7 @@
+<resources>
+    <style name="Theme.WebsiteBlocker" parent="android:Theme.Material.NoActionBar">
+        <item name="android:statusBarColor">#0D0E12</item>
+        <item name="android:navigationBarColor">#0D0E12</item>
+        <item name="android:windowBackground">#0D0E12</item>
+    </style>
+</resources>

@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">Website Blocker</string>
+    <string name="notification_channel_name">Focus Session</string>
+    <string name="notification_channel_desc">Shows active website blocking session and countdown timer</string>
+    <string name="vpn_permission_desc">Website Blocker requires local VPN access to filter DNS queries on-device.</string>
+</resources>

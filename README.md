@@ -1,21 +1,21 @@
-# 🛡️ Website Blocker (Windows Desktop)
+# 🛡️ Website Blocker (Windows Desktop & Android Mobile)
 
-A modern, high-performance Windows desktop productivity application built with **Python 3.13**, **PySide6 (Qt6)**, and **SQLite**. It enables users to temporarily or permanently block distracting websites at the system level via the Windows `hosts` file — eliminating distractions across **all web browsers** without requiring browser extensions.
+A multi-platform productivity suite to eliminate digital distractions:
+1. **Windows Desktop App**: Built with Python 3.13, PySide6 (Qt6), and SQLite with system-level `hosts` file modification.
+2. **Android Mobile App**: Built with Kotlin, Jetpack Compose, Room SQLite, and on-device local `VpnService` DNS filtering (no root required).
 
 ---
 
-## ✨ Features
+## ✨ Cross-Platform Features
 
-- 🌐 **System-Level Blocking**: Blocks domains directly via `C:\Windows\System32\drivers\etc\hosts` (redirected to `127.0.0.1` and `::1`). Works across Chrome, Edge, Firefox, Brave, Opera, and background web processes.
-- 🎨 **Next-Level Dark UI**: Custom-designed dark theme with glowing circular timer ring, clean navigation sidebar, gradient buttons, and responsive status indicators.
+- 🌐 **System-Level Multi-Browser Blocking**: Blocks domains across all browsers (Chrome, Edge, Firefox, Brave, Safari, Samsung Internet) without requiring browser extensions.
+- 🎨 **Next-Level Dark UI**: Custom-designed dark theme with glowing circular timer ring, clean navigation, and responsive status indicators.
 - 🏷️ **Smart Website Name Detection**: Automatically transforms any pasted link or URL into its clean brand name (e.g. `https://www.youtube.com/watch?v=123` $\rightarrow$ **YouTube**, `reddit.com` $\rightarrow$ **Reddit**, `x.com` $\rightarrow$ **X (Twitter)**, `news.ycombinator.com` $\rightarrow$ **Hacker News**).
-- 🖼️ **Automatic Favicon Fetching & Caching**: Automatically downloads official 64×64 website icons in the background via CDN with fallback support, cached locally on disk.
-- ⏱️ **Wall-Clock Precision Timer**: Countdown anchored to system timestamps to prevent drift even if the computer sleeps, minimizes, or enters power-saving mode.
-- 🔒 **Safe & Non-Destructive**: Never touches existing system hosts entries. All managed rules are strictly isolated between `# === WEBSITE BLOCKER START ===` and `# === WEBSITE BLOCKER END ===`.
-- 🔄 **Automatic Backup & DNS Flush**: Automatically creates `.backup` copies of the hosts file before any write and flushes the Windows DNS cache (`ipconfig /flushdns`) on session end.
-- ⚡ **Crash & Restart Recovery**: Automatically detects interrupted sessions on startup and restores countdown or safely clears block rules if expired.
+- 🖼️ **Automatic Favicon Fetching & Caching**: Automatically downloads official 64×64 website icons in the background via CDN with fallback support.
+- ⏱️ **Wall-Clock Precision Timer**: Countdown anchored to system timestamps to prevent drift even if minimized or screen is locked.
 - 📊 **Productivity Statistics**: Tracks daily and weekly focus time, session counts, and full chronological session history.
-- 📦 **Standalone Windows Desktop Application (`.exe`)**: Packaged with PyInstaller into a standalone executable with desktop shortcut and icon support.
+- 📱 **Android Mobile App (`android/`)**: Native Jetpack Compose app with on-device DNS query interception, zero remote servers.
+- 📦 **Standalone Windows Desktop Application (`.exe`)**: Packaged with PyInstaller into a standalone executable with desktop shortcut and custom app icon.
 
 ---
 
