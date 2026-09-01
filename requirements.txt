@@ -1,0 +1,5 @@
+PySide6>=6.7.0
+apscheduler>=3.10.4
+pytest>=8.0.0
+Pillow>=10.0.0
+pyinstaller>=6.0.0
