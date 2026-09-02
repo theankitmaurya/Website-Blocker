@@ -29,6 +29,8 @@ env/
 
 # Application Data & Logs
 data/
+!/android/app/src/main/java/com/websiteblocker/app/data/
+!/android/app/src/main/java/com/websiteblocker/app/data/**
 logs/
 *.db
 *.log
