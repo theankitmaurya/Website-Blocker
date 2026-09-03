@@ -1,0 +1,256 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Website Blocker — Unstoppable Focus Suite for Android & Windows</title>
+  <meta name="description" content="Eliminate digital distractions with unstoppable system-wide website & app blocking for Android and Windows." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0d0e12;
+      --card-bg: #16171d;
+      --card-border: rgba(255, 255, 255, 0.06);
+      --primary: #7c5cfc;
+      --primary-glow: rgba(124, 92, 252, 0.35);
+      --primary-light: #a78bfa;
+      --text-main: #f0f1f5;
+      --text-muted: #8b8fa8;
+      --accent-green: #22c55e;
+      --accent-red: #ef4444;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    .glow-bg {
+      position: absolute;
+      top: -120px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 700px;
+      height: 450px;
+      background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px;
+      position: relative;
+      z-index: 1;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 32px 0;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+      font-size: 1.25rem;
+      letter-spacing: -0.5px;
+    }
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      display: grid;
+      place-items: center;
+      font-size: 1.1rem;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(124, 92, 252, 0.12);
+      border: 1px solid rgba(124, 92, 252, 0.3);
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--primary-light);
+      margin-bottom: 24px;
+    }
+    .hero {
+      text-align: center;
+      padding: 60px 0 40px;
+    }
+    h1 {
+      font-size: clamp(2.4rem, 5vw, 3.8rem);
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -1.5px;
+      margin-bottom: 20px;
+    }
+    .highlight {
+      background: linear-gradient(135deg, #a78bfa, #c4b5fd, #ffffff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    p.lead {
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      max-width: 680px;
+      margin: 0 auto 36px;
+    }
+    .cta-group {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 48px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 28px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 1rem;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), #9e7efd);
+      color: #fff;
+      box-shadow: 0 8px 24px rgba(124, 92, 252, 0.35);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(124, 92, 252, 0.5);
+    }
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.09);
+      transform: translateY(-2px);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin: 60px 0;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 28px;
+      transition: border-color 0.2s;
+    }
+    .card:hover {
+      border-color: rgba(124, 92, 252, 0.35);
+    }
+    .card-icon {
+      font-size: 1.8rem;
+      margin-bottom: 16px;
+      display: inline-block;
+    }
+    .card h3 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .card p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+    footer {
+      border-top: 1px solid var(--card-border);
+      padding: 36px 0;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+    }
+    footer a { color: var(--primary-light); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="glow-bg"></div>
+  <div class="container">
+    <header>
+      <div class="logo">
+        <div class="logo-icon">🛡️</div>
+        <span>Website Blocker</span>
+      </div>
+      <a href="https://github.com/theankitmaurya/Website-Blocker" class="btn btn-secondary" style="padding: 9px 18px; font-size: 0.9rem;">
+        ⭐ GitHub
+      </a>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="badge">🔒 Unstoppable Strict Focus Engine</div>
+        <h1>Distraction-Free Productivity<br><span class="highlight">On Android & Windows</span></h1>
+        <p class="lead">
+          Block distracting websites and their native apps completely on your mobile device and PC. Once started, strict focus mode stays locked until your timer completes.
+        </p>
+
+        <div class="cta-group">
+          <a href="https://github.com/theankitmaurya/Website-Blocker/releases" class="btn btn-primary">
+            📱 Download Android APK
+          </a>
+          <a href="https://github.com/theankitmaurya/Website-Blocker/releases" class="btn btn-secondary">
+            💻 Download Windows App (.exe)
+          </a>
+        </div>
+      </section>
+
+      <section class="grid">
+        <div class="card">
+          <div class="card-icon">🔒</div>
+          <h3>Unstoppable Strict Mode</h3>
+          <p>Once you start your focus session, no one can prematurely cancel or bypass it. The countdown stays locked until 00:00:00.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🌐</div>
+          <h3>Web & Native App Blocking</h3>
+          <p>Blocks both browser URLs and native app APIs/CDNs (YouTube app, Instagram app, TikTok, Reddit, Netflix, Twitter/X, and more).</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🛡️</div>
+          <h3>100% On-Device & Private</h3>
+          <p>Runs local DNS loopback on Android and atomic hosts isolation on Windows. Zero remote servers, zero internet traffic leaves your device.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">⏱️</div>
+          <h3>Wall-Clock Precision Timer</h3>
+          <p>Anchored to hardware timestamps to ensure zero timing drift, even when minimized in the background or with the screen off.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">📊</div>
+          <h3>Productivity Analytics</h3>
+          <p>Real-time tracking for today's focus time, total sessions completed, and weekly historical metrics stored in a local SQLite database.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">⚡</div>
+          <h3>Seamless Background Service</h3>
+          <p>Runs as a persistent foreground service on Android and minimizes quietly to the Windows System Tray on Desktop.</p>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>© Website Blocker Suite · Built with Kotlin, Jetpack Compose, Python & Qt · Open Source on <a href="https://github.com/theankitmaurya/Website-Blocker" target="_blank">GitHub</a></p>
+    </footer>
+  </div>
+</body>
+</html>
