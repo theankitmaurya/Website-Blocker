@@ -241,3 +241,69 @@ def get_website_name(raw_input_or_domain: str) -> str:
 
     return title_cased or domain.capitalize()
 
+
+APP_COMPANIONS: dict[str, list[str]] = {
+    "youtube.com": [
+        "youtube.com", "youtu.be", "googlevideo.com", "youtubei.googleapis.com",
+        "ytimg.com", "yt3.ggpht.com", "yt4.ggpht.com", "youtube-nocookie.com"
+    ],
+    "youtu.be": [
+        "youtube.com", "youtu.be", "googlevideo.com", "youtubei.googleapis.com",
+        "ytimg.com", "yt3.ggpht.com", "yt4.ggpht.com", "youtube-nocookie.com"
+    ],
+    "instagram.com": [
+        "instagram.com", "cdninstagram.com", "ig.me", "threads.net", "igcdn.com"
+    ],
+    "facebook.com": [
+        "facebook.com", "fbcdn.net", "fbsbx.com", "fb.com", "messenger.com", "m.me"
+    ],
+    "fb.com": [
+        "facebook.com", "fbcdn.net", "fbsbx.com", "fb.com", "messenger.com", "m.me"
+    ],
+    "reddit.com": [
+        "reddit.com", "redd.it", "redditstatic.com", "redditmedia.com"
+    ],
+    "twitter.com": [
+        "twitter.com", "x.com", "twimg.com", "t.co", "periscope.tv"
+    ],
+    "x.com": [
+        "twitter.com", "x.com", "twimg.com", "t.co", "periscope.tv"
+    ],
+    "tiktok.com": [
+        "tiktok.com", "tiktokv.com", "tiktokcdn.com", "byteoversea.com", "ibytedtos.com", "musical.ly"
+    ],
+    "netflix.com": [
+        "netflix.com", "nflxvideo.net", "nflximg.net", "nflxext.com", "nflxso.net"
+    ],
+    "twitch.tv": [
+        "twitch.tv", "twitch.com", "ttvnw.net", "jtvnw.net", "twitchcdn.net"
+    ],
+    "twitch.com": [
+        "twitch.tv", "twitch.com", "ttvnw.net", "jtvnw.net", "twitchcdn.net"
+    ],
+    "spotify.com": [
+        "spotify.com", "scdn.co", "spotifycdn.com", "spoti.fi"
+    ],
+    "discord.com": [
+        "discord.com", "discord.gg", "discordapp.com", "discordapp.net", "discordstatus.com"
+    ],
+    "discord.gg": [
+        "discord.com", "discord.gg", "discordapp.com", "discordapp.net"
+    ],
+    "snapchat.com": [
+        "snapchat.com", "sc-cdn.net", "snapkit.com"
+    ],
+    "pinterest.com": [
+        "pinterest.com", "pinimg.com"
+    ],
+    "quora.com": [
+        "quora.com", "quoracdn.net"
+    ],
+}
+
+
+def get_companion_domains(domain: str) -> list[str]:
+    """Returns all associated app endpoints, CDNs, and aliases for a domain."""
+    clean = normalize_domain(domain) or domain.strip().lower()
+    return APP_COMPANIONS.get(clean, [clean])
+

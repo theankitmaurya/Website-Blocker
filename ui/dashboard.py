@@ -18,6 +18,7 @@ from database.database import DatabaseManager
 from database.models import Session
 from ui.custom_widgets import CircularTimerWidget
 from utils.validators import get_website_name
+from utils.permissions import is_admin, request_elevation
 from utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -155,7 +156,7 @@ class DashboardWidget(QWidget):
         idle_layout.setContentsMargins(20, 18, 20, 18)
         idle_layout.setSpacing(14)
 
-        dur_label = QLabel("Duration")
+        dur_label = QLabel("DURATION  ·  🔒 STRICT MODE (UNSTOPPABLE)")
         dur_label.setStyleSheet("color:#8B8FA8; font-size:11px; font-weight:700; letter-spacing:0.8px;")
         idle_layout.addWidget(dur_label)
 
@@ -203,7 +204,7 @@ class DashboardWidget(QWidget):
         idle_layout.addWidget(self.custom_row)
 
         # Start button
-        self.start_btn = QPushButton("🚀   Start Focus Session")
+        self.start_btn = QPushButton("🚀   Start Strict Focus Session")
         self.start_btn.setObjectName("BtnPrimary")
         self.start_btn.setMinimumHeight(46)
         self.start_btn.setCursor(Qt.PointingHandCursor)
@@ -223,12 +224,36 @@ class DashboardWidget(QWidget):
         self.blocked_sites_label.setStyleSheet("color:#8B6EE8; font-size:12px; font-weight:600;")
         active_layout.addWidget(self.blocked_sites_label)
 
-        self.stop_btn = QPushButton("⏹   Stop Session")
-        self.stop_btn.setObjectName("BtnDanger")
-        self.stop_btn.setMinimumHeight(46)
-        self.stop_btn.setCursor(Qt.PointingHandCursor)
-        self.stop_btn.clicked.connect(self._on_stop_clicked)
-        active_layout.addWidget(self.stop_btn)
+        # Locked strict card indicator (replaces manual stop button)
+        lock_box = QFrame()
+        lock_box.setStyleSheet("""
+            QFrame {
+                background: rgba(239, 68, 68, 0.08);
+                border: 1px solid rgba(239, 68, 68, 0.22);
+                border-radius: 10px;
+                padding: 10px;
+            }
+        """)
+        lock_lay = QHBoxLayout(lock_box)
+        lock_lay.setContentsMargins(8, 6, 8, 6)
+        lock_lay.setSpacing(10)
+
+        icon_lbl = QLabel("🔒")
+        icon_lbl.setStyleSheet("font-size: 20px;")
+        lock_lay.addWidget(icon_lbl)
+
+        txt_col = QVBoxLayout()
+        txt_col.setSpacing(2)
+        txt_title = QLabel("Strict Mode Active")
+        txt_title.setStyleSheet("color: #F87171; font-weight: 700; font-size: 13px;")
+        txt_sub = QLabel("Timer cannot be stopped early. Websites will remain blocked until the session completes.")
+        txt_sub.setStyleSheet("color: #8B8FA8; font-size: 11px;")
+        txt_sub.setWordWrap(True)
+        txt_col.addWidget(txt_title)
+        txt_col.addWidget(txt_sub)
+        lock_lay.addLayout(txt_col, 1)
+
+        active_layout.addWidget(lock_box)
 
         self.active_card.setVisible(False)
         main.addWidget(self.active_card)
@@ -328,22 +353,27 @@ class DashboardWidget(QWidget):
             self._enter_active_mode(duration, domains)
             self.session_started.emit(duration)
         except BlockerError as e:
+            if not is_admin():
+                reply = QMessageBox.question(
+                    self,
+                    "Administrator Privileges Required",
+                    "Modifying the Windows hosts file requires Administrator privileges.\n\n"
+                    "Would you like to restart Website Blocker with Administrator privileges now?",
+                    QMessageBox.Yes | QMessageBox.No,
+                    QMessageBox.Yes,
+                )
+                if reply == QMessageBox.Yes:
+                    if request_elevation():
+                        from PySide6.QtWidgets import QApplication
+                        QApplication.quit()
+                        return
             QMessageBox.critical(
                 self, "Blocking Failed",
                 f"Could not start the blocking session:\n\n{e}\n\n"
-                "Ensure the application is running with Administrator privileges.",
+                "Please run Website Blocker as Administrator (Right click -> Run as administrator).",
             )
 
-    def _on_stop_clicked(self) -> None:
-        reply = QMessageBox.question(
-            self, "Stop Session?",
-            "Are you sure you want to stop your focus session early?",
-            QMessageBox.Yes | QMessageBox.No, QMessageBox.No,
-        )
-        if reply == QMessageBox.Yes:
-            self.stop_current_session(status="stopped")
-
-    def stop_current_session(self, status: str = "stopped") -> None:
+    def stop_current_session(self, status: str = "completed") -> None:
         self.timer.stop()
         if self.current_session and self.current_session.id:
             self.blocker.end_session(self.current_session.id, status=status)

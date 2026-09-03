@@ -135,11 +135,35 @@ class HostsManager:
 
     def _atomic_write(self, content: str) -> None:
         """
-        Writes content to hosts file atomically using a temporary file and replace.
+        Writes content to hosts file safely.
+        Clears Read-Only attribute, writes directly with fsync, and falls back to atomic replace.
         """
         target_dir = self.hosts_path.parent
         target_dir.mkdir(parents=True, exist_ok=True)
 
+        # 1. Clear Read-Only attribute if file exists
+        if self.hosts_path.exists():
+            try:
+                import stat
+                os.chmod(str(self.hosts_path), stat.S_IWRITE | stat.S_IREAD)
+            except Exception:
+                pass
+
+        # 2. Try direct write to hosts file
+        try:
+            with open(str(self.hosts_path), "w", encoding="utf-8", newline="\n") as f:
+                f.write(content)
+                if not content.endswith("\n"):
+                    f.write("\n")
+                f.flush()
+                os.fsync(f.fileno())
+            return
+        except PermissionError as pe:
+            logger.warning("Direct write to hosts file failed (%s), trying atomic replace fallback...", pe)
+        except Exception as e:
+            logger.warning("Direct write encountered error (%s), trying atomic replace fallback...", e)
+
+        # 3. Fallback: NamedTemporaryFile + replace
         temp_file = None
         try:
             with tempfile.NamedTemporaryFile(
@@ -154,7 +178,13 @@ class HostsManager:
                 if not content.endswith("\n"):
                     f.write("\n")
 
-            # Atomically replace destination
+            # Try to chmod temp file before replacing
+            try:
+                import stat
+                os.chmod(str(temp_file), stat.S_IWRITE | stat.S_IREAD)
+            except Exception:
+                pass
+
             os.replace(str(temp_file), str(self.hosts_path))
         except Exception as e:
             if temp_file and temp_file.exists():
@@ -163,7 +193,9 @@ class HostsManager:
                 except Exception:
                     pass
             logger.error("Failed to write to hosts file: %s", e)
-            raise HostsManagerError(f"Permission denied or error writing to hosts file: {e}") from e
+            raise HostsManagerError(
+                f"Permission denied writing to hosts file: {e}. Please ensure the application is running as Administrator."
+            ) from e
 
     def write_blocked(self, domains: List[str]) -> bool:
         """
@@ -190,21 +222,26 @@ class HostsManager:
             if not clean:
                 continue
 
-            # Bare and www variants
-            variants = [clean]
-            if not clean.startswith("www."):
-                variants.append(f"www.{clean}")
+            # Expand domain with its companion app endpoints & CDNs
+            from utils.validators import get_companion_domains
+            expanded = get_companion_domains(clean)
 
-            for host in variants:
-                if host in added_hosts:
-                    continue
-                if host in external_domains:
-                    logger.warning("Skipping '%s' as it is already configured in external hosts lines.", host)
-                    continue
+            for item in expanded:
+                # Bare and www variants
+                variants = [item]
+                if not item.startswith("www."):
+                    variants.append(f"www.{item}")
 
-                added_hosts.add(host)
-                block_lines.append(f"{LOOPBACK_IPV4} {host}")
-                block_lines.append(f"{LOOPBACK_IPV6} {host}")
+                for host in variants:
+                    if host in added_hosts:
+                        continue
+                    if host in external_domains:
+                        logger.warning("Skipping '%s' as it is already configured in external hosts lines.", host)
+                        continue
+
+                    added_hosts.add(host)
+                    block_lines.append(f"{LOOPBACK_IPV4} {host}")
+                    block_lines.append(f"{LOOPBACK_IPV6} {host}")
 
         block_lines.append(BLOCK_MARKER_END)
 
@@ -225,6 +262,7 @@ class HostsManager:
 
         assembled = "\n".join(new_lines) + "\n"
         self._atomic_write(assembled)
+        self.flush_dns()
         logger.info("Successfully updated hosts file with %d blocked domain variants.", len(added_hosts))
         return True
 

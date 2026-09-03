@@ -133,9 +133,6 @@ class MainActivity : ComponentActivity() {
                             onStartSession = { duration ->
                                 startSessionWithVpn(duration)
                             },
-                            onStopSession = {
-                                stopFocusTimerService()
-                            },
                             enabledWebsitesCount = websites.count { it.enabled },
                             todayFocusSeconds = todayFocusSeconds,
                             todaySessionsCount = todayCompleted.size,
@@ -191,6 +188,7 @@ class MainActivity : ComponentActivity() {
                                     db.sessionDao().clearAll()
                                 }
                             },
+                            isSessionActive = isSessionActive,
                             modifier = Modifier
                                 .fillMaxSize()
                                 .padding(innerPadding)
@@ -231,12 +229,5 @@ class MainActivity : ComponentActivity() {
         } else {
             startService(serviceIntent)
         }
-    }
-
-    private fun stopFocusTimerService() {
-        val serviceIntent = Intent(this, FocusTimerService::class.java).apply {
-            action = FocusTimerService.ACTION_STOP_TIMER
-        }
-        startService(serviceIntent)
     }
 }

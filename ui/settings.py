@@ -43,6 +43,19 @@ class SettingsWidget(QWidget):
         main.addWidget(lbl_title)
         main.addWidget(lbl_sub)
 
+        # ── Lock banner ───────────────────────────────────────────────
+        self.lock_banner = QFrame()
+        self.lock_banner.setObjectName("WarningCard")
+        lock_lay = QHBoxLayout(self.lock_banner)
+        lock_lay.setContentsMargins(14, 10, 14, 10)
+        lock_lbl = QLabel(
+            "🔒  Focus session active. Hosts restore and data clearing are locked."
+        )
+        lock_lbl.setStyleSheet("color:#D97706; font-weight:600; font-size:12px;")
+        lock_lay.addWidget(lock_lbl)
+        self.lock_banner.setVisible(False)
+        main.addWidget(self.lock_banner)
+
         # ── Hosts file section ────────────────────────────────────────
         main.addWidget(self._section_label("HOSTS FILE & DNS"))
         hosts_card = self._card()
@@ -62,17 +75,17 @@ class SettingsWidget(QWidget):
         btns1 = QHBoxLayout()
         btns1.setSpacing(10)
 
-        btn_restore = QPushButton("🔄  Restore Hosts Backup")
-        btn_restore.setObjectName("BtnSecondary")
-        btn_restore.setCursor(Qt.PointingHandCursor)
-        btn_restore.clicked.connect(self._restore)
-        btns1.addWidget(btn_restore)
+        self.btn_restore = QPushButton("🔄  Restore Hosts Backup")
+        self.btn_restore.setObjectName("BtnSecondary")
+        self.btn_restore.setCursor(Qt.PointingHandCursor)
+        self.btn_restore.clicked.connect(self._restore)
+        btns1.addWidget(self.btn_restore)
 
-        btn_flush = QPushButton("⚡  Flush DNS Cache")
-        btn_flush.setObjectName("BtnSecondary")
-        btn_flush.setCursor(Qt.PointingHandCursor)
-        btn_flush.clicked.connect(self._flush_dns)
-        btns1.addWidget(btn_flush)
+        self.btn_flush = QPushButton("⚡  Flush DNS Cache")
+        self.btn_flush.setObjectName("BtnSecondary")
+        self.btn_flush.setCursor(Qt.PointingHandCursor)
+        self.btn_flush.clicked.connect(self._flush_dns)
+        btns1.addWidget(self.btn_flush)
 
         btns1.addStretch()
         hosts_lay.addLayout(btns1)
@@ -93,12 +106,12 @@ class SettingsWidget(QWidget):
         desc2.setStyleSheet("color:#565869; font-size:12px;")
         data_lay.addWidget(desc2)
 
-        btn_clear = QPushButton("🗑  Clear Session History")
-        btn_clear.setObjectName("BtnDanger")
-        btn_clear.setCursor(Qt.PointingHandCursor)
-        btn_clear.clicked.connect(self._clear_history)
-        btn_clear.setFixedWidth(220)
-        data_lay.addWidget(btn_clear, alignment=Qt.AlignLeft)
+        self.btn_clear = QPushButton("🗑  Clear Session History")
+        self.btn_clear.setObjectName("BtnDanger")
+        self.btn_clear.setCursor(Qt.PointingHandCursor)
+        self.btn_clear.clicked.connect(self._clear_history)
+        self.btn_clear.setFixedWidth(220)
+        data_lay.addWidget(self.btn_clear, alignment=Qt.AlignLeft)
         main.addWidget(data_card)
 
         # ── System info ───────────────────────────────────────────────
@@ -156,6 +169,11 @@ class SettingsWidget(QWidget):
         card = QFrame()
         card.setObjectName("SecondaryCard")
         return card
+
+    def set_locked(self, locked: bool) -> None:
+        self.lock_banner.setVisible(locked)
+        self.btn_restore.setEnabled(not locked)
+        self.btn_clear.setEnabled(not locked)
 
     # ------------------------------------------------------------------
     # Actions

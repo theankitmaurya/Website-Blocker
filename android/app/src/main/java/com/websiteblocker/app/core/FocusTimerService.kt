@@ -55,7 +55,10 @@ class FocusTimerService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
             ACTION_STOP_TIMER -> {
-                stopTimer("stopped")
+                // Strict mode: Timer cannot be stopped early until it reaches zero
+                if (!_isSessionActive.value) {
+                    stopTimer("stopped")
+                }
             }
             ACTION_START_TIMER -> {
                 val duration = intent.getIntExtra(EXTRA_DURATION_SECONDS, 3600)
@@ -154,22 +157,13 @@ class FocusTimerService : Service() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val stopIntent = Intent(this, FocusTimerService::class.java).apply {
-            action = ACTION_STOP_TIMER
-        }
-        val stopPendingIntent = PendingIntent.getService(
-            this, 1, stopIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("🛡️ Focus Session Active")
-            .setContentText("Websites blocked • Remaining: $timeStr")
+            .setContentTitle("🔒 Strict Focus Session Active")
+            .setContentText("Websites blocked • Remaining: $timeStr (Locked)")
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
-            .addAction(0, "Stop", stopPendingIntent)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .build()
     }

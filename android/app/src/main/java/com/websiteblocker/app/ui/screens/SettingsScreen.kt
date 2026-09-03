@@ -18,6 +18,7 @@ import com.websiteblocker.app.ui.theme.*
 @Composable
 fun SettingsScreen(
     onClearHistory: () -> Unit,
+    isSessionActive: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     var showConfirmDialog by remember { mutableStateOf(false) }
@@ -107,7 +108,7 @@ fun SettingsScreen(
                     Text("Website Blocker Android", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = TextPrimary)
                 }
 
-                Divider(color = BorderDark, modifier = Modifier.padding(vertical = 10.dp))
+                HorizontalDivider(color = BorderDark, modifier = Modifier.padding(vertical = 10.dp))
 
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -117,7 +118,7 @@ fun SettingsScreen(
                     Text("1.0.0 (Release)", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = TextPrimary)
                 }
 
-                Divider(color = BorderDark, modifier = Modifier.padding(vertical = 10.dp))
+                HorizontalDivider(color = BorderDark, modifier = Modifier.padding(vertical = 10.dp))
 
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -166,11 +167,18 @@ fun SettingsScreen(
 
                 OutlinedButton(
                     onClick = { showConfirmDialog = true },
+                    enabled = !isSessionActive,
                     shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = DangerRed),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = DangerRed,
+                        disabledContentColor = TextMuted
+                    ),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Clear All Session History", fontWeight = FontWeight.SemiBold)
+                    Text(
+                        text = if (isSessionActive) "Session in Progress (Locked)" else "Clear All Session History",
+                        fontWeight = FontWeight.SemiBold
+                    )
                 }
             }
         }

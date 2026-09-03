@@ -1,5 +1,6 @@
 package com.websiteblocker.app.core
 
+import com.websiteblocker.app.utils.DomainUtils
 import java.nio.ByteBuffer
 import java.util.Locale
 
@@ -72,21 +73,26 @@ object DnsPacketFilter {
     }
 
     /**
-     * Checks if [queryDomain] matches [blockedDomain] directly or as a subdomain.
-     * E.g. queryDomain "m.youtube.com" matches blockedDomain "youtube.com".
+     * Checks if [queryDomain] matches [blockedDomains] directly, as a subdomain,
+     * or via known native mobile/desktop app companion domains (e.g. googlevideo.com for YouTube app).
      */
     fun isDomainBlocked(queryDomain: String, blockedDomains: Set<String>): Boolean {
         if (blockedDomains.isEmpty() || queryDomain.isBlank()) return false
         val cleanQuery = queryDomain.lowercase(Locale.ROOT).trimEnd('.')
 
-        if (blockedDomains.contains(cleanQuery)) {
-            return true
-        }
-
         for (blocked in blockedDomains) {
             val cleanBlocked = blocked.lowercase(Locale.ROOT).trimEnd('.')
-            if (cleanQuery.endsWith(".$cleanBlocked")) {
+            if (cleanQuery == cleanBlocked || cleanQuery.endsWith(".$cleanBlocked")) {
                 return true
+            }
+
+            // Also check all app API & CDN companion domains
+            val companions = DomainUtils.getCompanionDomains(cleanBlocked)
+            for (comp in companions) {
+                val cleanComp = comp.lowercase(Locale.ROOT).trimEnd('.')
+                if (cleanQuery == cleanComp || cleanQuery.endsWith(".$cleanComp")) {
+                    return true
+                }
             }
         }
         return false

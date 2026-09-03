@@ -2,11 +2,11 @@
 from typing import Optional
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QFont
+from PySide6.QtGui import QFont, QIcon, QAction
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QHBoxLayout, QVBoxLayout,
     QPushButton, QStackedWidget, QLabel, QStatusBar,
-    QMessageBox, QFrame,
+    QMessageBox, QFrame, QSystemTrayIcon, QMenu,
 )
 
 from core.blocker import BlockerService
@@ -15,11 +15,12 @@ from core.hosts_manager import HostsManager
 from core.timer import BlockTimer
 from database.database import DatabaseManager
 from services.favicon_service import FaviconLoader
+from utils.permissions import is_admin
 from ui.dashboard import DashboardWidget
 from ui.websites import WebsitesWidget
 from ui.statistics import StatisticsWidget
 from ui.settings import SettingsWidget
-from utils.config import APP_NAME, APP_VERSION
+from utils.config import APP_NAME, APP_VERSION, ASSETS_DIR
 from utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -461,6 +462,7 @@ class MainWindow(QMainWindow):
         self._current_page = 0
 
         self._build_ui()
+        self._setup_tray_icon()
         self._wire_events()
         self._startup_recovery()
 
@@ -599,6 +601,41 @@ class MainWindow(QMainWindow):
             self.page_statistics.refresh_stats()
 
     # ------------------------------------------------------------------
+    # System Tray & Background execution
+    # ------------------------------------------------------------------
+
+    def _setup_tray_icon(self) -> None:
+        if not QSystemTrayIcon.isSystemTrayAvailable():
+            self.tray_icon = None
+            return
+
+        icon_ico = ASSETS_DIR / "icon.ico"
+        icon_png = ASSETS_DIR / "icon.png"
+        icon_path = icon_ico if icon_ico.exists() else icon_png
+        icon = QIcon(str(icon_path)) if icon_path.exists() else self.windowIcon()
+
+        self.tray_icon = QSystemTrayIcon(icon, self)
+        self.tray_icon.setToolTip(f"{APP_NAME}  ·  v{APP_VERSION}")
+
+        tray_menu = QMenu()
+        open_action = QAction("Open Website Blocker", self)
+        open_action.triggered.connect(self._restore_from_tray)
+        tray_menu.addAction(open_action)
+
+        self.tray_icon.setContextMenu(tray_menu)
+        self.tray_icon.activated.connect(self._on_tray_activated)
+        self.tray_icon.show()
+
+    def _on_tray_activated(self, reason: QSystemTrayIcon.ActivationReason) -> None:
+        if reason in (QSystemTrayIcon.Trigger, QSystemTrayIcon.DoubleClick):
+            self._restore_from_tray()
+
+    def _restore_from_tray(self) -> None:
+        self.showNormal()
+        self.activateWindow()
+        self.raise_()
+
+    # ------------------------------------------------------------------
     # Event wiring
     # ------------------------------------------------------------------
 
@@ -610,16 +647,34 @@ class MainWindow(QMainWindow):
 
     def _on_session_started(self, _duration: int) -> None:
         self.page_websites.set_locked(True)
+        self.page_settings.set_locked(True)
         self.statusBar().showMessage(
-            "🔴  Focus session active — websites are blocked", 6000
+            "🔴  Strict focus session active — websites and apps are blocked in background", 6000
         )
+        if self.tray_icon:
+            self.tray_icon.setToolTip(f"{APP_NAME}  ·  🔒 Strict Session Active (Websites & Apps Blocked)")
+            self.tray_icon.showMessage(
+                "Focus Session Active",
+                "Websites & associated apps are blocked. App is running in the background.",
+                QSystemTrayIcon.Information,
+                3000,
+            )
 
     def _on_session_stopped(self) -> None:
         self.page_websites.set_locked(False)
+        self.page_settings.set_locked(False)
         self.page_statistics.refresh_stats()
         self.statusBar().showMessage(
-            "✅  Session ended — hosts file restored  ·  DNS flushed", 6000
+            "✅  Session completed — hosts file restored  ·  DNS flushed", 6000
         )
+        if self.tray_icon:
+            self.tray_icon.setToolTip(f"{APP_NAME}  ·  v{APP_VERSION}")
+            self.tray_icon.showMessage(
+                "Focus Session Completed",
+                "All websites and apps have been unblocked.",
+                QSystemTrayIcon.Information,
+                3000,
+            )
 
     def _on_websites_changed(self) -> None:
         self.page_dashboard.refresh_stats()
@@ -645,11 +700,15 @@ class MainWindow(QMainWindow):
             logger.info("Restoring session #%s into UI.", recovered.id)
             self.page_dashboard.restore_active_session(recovered)
             self.page_websites.set_locked(True)
+            self.page_settings.set_locked(True)
             self.statusBar().showMessage(
                 "⚠️  Resumed active session from previous run", 8000
             )
         else:
-            self.statusBar().showMessage(f"{APP_NAME} is ready", 3000)
+            if is_admin():
+                self.statusBar().showMessage(f"🛡️  {APP_NAME} is ready  ·  Administrator Mode Active", 5000)
+            else:
+                self.statusBar().showMessage("⚠️  Running in Standard User Mode — Administrator privileges needed to block", 8000)
 
     # ------------------------------------------------------------------
     # Close event
@@ -657,20 +716,15 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self, event) -> None:
         if self.timer.is_running:
-            reply = QMessageBox.question(
+            event.ignore()
+            QMessageBox.warning(
                 self,
-                "Session In Progress",
-                "A focus session is currently running.\n\n"
-                "Stop the session and unblock websites before closing?",
-                QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,
-                QMessageBox.Cancel,
+                "🔒 Focus Session Locked",
+                "The application cannot be closed while a focus session is active.\n\n"
+                "Strict Mode prevents closing the app until the countdown finishes.",
             )
-            if reply == QMessageBox.Yes:
-                self.page_dashboard.stop_current_session(status="stopped")
-                event.accept()
-            elif reply == QMessageBox.No:
-                event.accept()
-            else:
-                event.ignore()
+            self.statusBar().showMessage(
+                "🔒 Close blocked: Focus session must complete before exiting", 5000
+            )
         else:
             event.accept()

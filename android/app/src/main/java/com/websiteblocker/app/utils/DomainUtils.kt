@@ -86,6 +86,70 @@ object DomainUtils {
         "duolingo.com" to "Duolingo"
     )
 
+    val APP_COMPANIONS: Map<String, Set<String>> = mapOf(
+        "youtube.com" to setOf(
+            "youtube.com", "youtu.be", "googlevideo.com", "youtubei.googleapis.com",
+            "ytimg.com", "yt3.ggpht.com", "yt4.ggpht.com", "youtube-nocookie.com"
+        ),
+        "youtu.be" to setOf(
+            "youtube.com", "youtu.be", "googlevideo.com", "youtubei.googleapis.com",
+            "ytimg.com", "yt3.ggpht.com", "yt4.ggpht.com", "youtube-nocookie.com"
+        ),
+        "instagram.com" to setOf(
+            "instagram.com", "cdninstagram.com", "ig.me", "threads.net", "igcdn.com"
+        ),
+        "facebook.com" to setOf(
+            "facebook.com", "fbcdn.net", "fbsbx.com", "fb.com", "messenger.com", "m.me"
+        ),
+        "fb.com" to setOf(
+            "facebook.com", "fbcdn.net", "fbsbx.com", "fb.com", "messenger.com", "m.me"
+        ),
+        "reddit.com" to setOf(
+            "reddit.com", "redd.it", "redditstatic.com", "redditmedia.com"
+        ),
+        "twitter.com" to setOf(
+            "twitter.com", "x.com", "twimg.com", "t.co", "periscope.tv"
+        ),
+        "x.com" to setOf(
+            "twitter.com", "x.com", "twimg.com", "t.co", "periscope.tv"
+        ),
+        "tiktok.com" to setOf(
+            "tiktok.com", "tiktokv.com", "tiktokcdn.com", "byteoversea.com", "ibytedtos.com", "musical.ly"
+        ),
+        "netflix.com" to setOf(
+            "netflix.com", "nflxvideo.net", "nflximg.net", "nflxext.com", "nflxso.net"
+        ),
+        "twitch.tv" to setOf(
+            "twitch.tv", "twitch.com", "ttvnw.net", "jtvnw.net", "twitchcdn.net"
+        ),
+        "twitch.com" to setOf(
+            "twitch.tv", "twitch.com", "ttvnw.net", "jtvnw.net", "twitchcdn.net"
+        ),
+        "spotify.com" to setOf(
+            "spotify.com", "scdn.co", "spotifycdn.com", "spoti.fi"
+        ),
+        "discord.com" to setOf(
+            "discord.com", "discord.gg", "discordapp.com", "discordapp.net", "discordstatus.com"
+        ),
+        "discord.gg" to setOf(
+            "discord.com", "discord.gg", "discordapp.com", "discordapp.net"
+        ),
+        "snapchat.com" to setOf(
+            "snapchat.com", "sc-cdn.net", "snapkit.com"
+        ),
+        "pinterest.com" to setOf(
+            "pinterest.com", "pinimg.com"
+        ),
+        "quora.com" to setOf(
+            "quora.com", "quoracdn.net"
+        )
+    )
+
+    fun getCompanionDomains(domain: String): Set<String> {
+        val clean = normalizeDomain(domain) ?: domain.trim().lowercase(Locale.ROOT)
+        return APP_COMPANIONS[clean] ?: setOf(clean)
+    }
+
     private val MULTI_PART_TLDS = setOf(
         "co.uk", "gov.uk", "ac.uk", "org.uk", "net.uk",
         "co.in", "net.in", "org.in", "gov.in",

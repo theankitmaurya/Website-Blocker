@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,7 +27,6 @@ import com.websiteblocker.app.ui.theme.*
 @Composable
 fun DashboardScreen(
     onStartSession: (Int) -> Unit,
-    onStopSession: () -> Unit,
     enabledWebsitesCount: Int,
     todayFocusSeconds: Int,
     todaySessionsCount: Int,
@@ -119,13 +120,34 @@ fun DashboardScreen(
                     .border(1.dp, BorderDark, RoundedCornerShape(16.dp))
             ) {
                 Column(modifier = Modifier.padding(18.dp)) {
-                    Text(
-                        text = "SESSION DURATION",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 11.sp,
-                        letterSpacing = 1.sp,
-                        color = TextSecondary
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = "SESSION DURATION",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 11.sp,
+                            letterSpacing = 1.sp,
+                            color = TextSecondary,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.Lock,
+                                contentDescription = "Strict Mode",
+                                tint = PrimaryVioletLight,
+                                modifier = Modifier.size(13.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "Strict Mode (Unstoppable)",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = PrimaryVioletLight
+                            )
+                        }
+                    }
 
                     Spacer(modifier = Modifier.height(12.dp))
 
@@ -182,7 +204,7 @@ fun DashboardScreen(
                             )
                     ) {
                         Text(
-                            text = "🚀  Start Focus Session",
+                            text = "🚀  Start Strict Focus Session",
                             fontWeight = FontWeight.Bold,
                             fontSize = 15.sp,
                             color = Color.White
@@ -191,39 +213,56 @@ fun DashboardScreen(
                 }
             }
         } else {
-            // Active Session Controls
+            // Active Session Controls - Strict Unstoppable Locked Card
             Card(
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = AccentPurple),
+                colors = CardDefaults.cardColors(containerColor = CardDark),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .border(1.dp, PrimaryViolet.copy(alpha = 0.35f), RoundedCornerShape(16.dp))
+                    .border(1.dp, DangerRed.copy(alpha = 0.4f), RoundedCornerShape(16.dp))
             ) {
                 Column(modifier = Modifier.padding(18.dp)) {
                     Text(
                         text = "🛡️ Blocking $enabledWebsitesCount configured websites",
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 14.sp,
-                        color = PrimaryVioletLight
+                        color = TextPrimary
                     )
 
-                    Spacer(modifier = Modifier.height(14.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
 
-                    Button(
-                        onClick = onStopSession,
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = DangerRed.copy(alpha = 0.15f)),
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(50.dp)
-                            .border(1.dp, DangerRed.copy(alpha = 0.35f), RoundedCornerShape(12.dp))
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(DangerRed.copy(alpha = 0.10f))
+                            .border(1.dp, DangerRed.copy(alpha = 0.28f), RoundedCornerShape(12.dp))
+                            .padding(14.dp)
                     ) {
-                        Text(
-                            text = "⏹  Stop Focus Session",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 15.sp,
-                            color = DangerRed
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.Lock,
+                                contentDescription = "Strict Mode",
+                                tint = DangerRed,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column {
+                                Text(
+                                    text = "Strict Mode Active",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 14.sp,
+                                    color = DangerRed
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = "Timer cannot be stopped early. Websites stay blocked until the countdown completes.",
+                                    fontSize = 12.sp,
+                                    color = TextSecondary,
+                                    lineHeight = 16.sp
+                                )
+                            }
+                        }
                     }
                 }
             }
